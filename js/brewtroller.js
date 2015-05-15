@@ -261,7 +261,7 @@ Brewtroller.program = {
 	      }
   },
   sendRecipeToBrewtroller : function (beerJSON) {
-	  var recipeSlot = $("#loadProgramNumber").val(),
+	  var recipeSlot = $("#loadProgramNumber").val() - 1,
 	  	  doughIn,
 	  	  acidRest,
 	  	  saccRest,
