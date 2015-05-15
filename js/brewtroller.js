@@ -10,6 +10,8 @@ var programStep1;
 var programStep2;
 var programName1;
 var programName2;
+var btVersion = 0.0;
+var btUnits = "imperial"; // 0= Metric, 1=Imperial
 
 //Brewtroller Web Init
 Brewtroller.init = function () {
@@ -148,11 +150,12 @@ Brewtroller.connected = {
     click_buttonConnect : function () {
         if (connected) {
             connected = false;
+			btVersion = 0;
             $("#button_connect").html("Connect");
             $("#button_connect").css('color', '#777777');
         } else {
             connected = true;
-            Brewtroller.connected.loop();
+			Brewtroller.connected.loop();
             //Brewtroller.program.getProgramList();
 //            $("#beerXMLModalButton").removeAttr("disabled");
 //            $("#programModalButton").removeAttr("disabled");
@@ -160,8 +163,12 @@ Brewtroller.connected = {
     },    
     loop : function () {
       if(connected === true) {
+		  if (btVersion == 0) {
+			  brewTrollerExecCommand(BTCMD_GetVersion, null, {}, host, username, password, Brewtroller.status.updateVersion);
+		  } else {
+			  brewTrollerExecCommand(BTCMD_GetStatus, null, {}, host, username, password, Brewtroller.status.printUI);
+		  }
         Brewtroller.connected.checkWatchdog();
-        brewTrollerExecCommand(BTCMD_GetStatus, null, {}, host, username, password, Brewtroller.status.printUI);
         setTimeout(Brewtroller.connected.loop, 750);
         Brewtroller.status.updateStatusBar();
       }
@@ -555,6 +562,11 @@ Brewtroller.reset = {
 
 //Status Functions
 Brewtroller.status = {
+	updateVersion : function (data) {
+		btVersion = parseFloat(data["btVersion"]);
+		btUnits = (data["metric"]=="0" ? "metric" : "imperial");
+		Brewtroller.connected.connectWatchdog();
+	},
 	updateStatusBar : function () {
 		if(programName2 !== "255" && programName2 !== "") {
 			$('#boilZonePanel').show();
