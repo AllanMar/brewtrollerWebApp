@@ -413,7 +413,33 @@ Brewtroller.program = {
 	  
   }  
 };
-
+	//Taken from BT Live project
+	var correctUnits = function(input, type, currentSystem, targetSystem) {
+	 if (currentSystem == targetSystem) return input;
+	  if (currentSystem == "metric"){
+	    switch (type){
+	      case "temperature":
+	        return input * (9/5) + 32;
+	      case "volume":
+	        return input * 0.264;
+	      case "weight":
+	        return input * 2.204;
+	      case "ratio":
+	        return input / 0.9464;
+	    }
+	  } else {
+	    switch (type){
+	      case "temperature":
+	        return (input - 32)/(9.5);
+	      case "volume":
+	        return input / 0.264;
+	      case "weight":
+	        return input / 2.204;
+	      case "ratio":
+  	      return input * 0.9464;
+	    };
+	  }
+	}
 
 //Timer Functions
 Brewtroller.timer = {
