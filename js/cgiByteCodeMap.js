@@ -286,7 +286,7 @@ var BTCMD_SetProgramName = {
 					 ]
 	};
 var BTCMD_SetProgramMashTemps = {
-	      reqCode: '%5C',
+	      reqCode: '^',
 	      reqIndex: true,
 	      reqParams: [
 	                  "Dough_In_Temp",
@@ -296,7 +296,7 @@ var BTCMD_SetProgramMashTemps = {
 	                  "Sacch2_Temp",
 	                  "Mash_Out_Temp"
 	                  ],
-	      rspCode: '>',
+	      rspCode: ']',
 	      rspParams: [
 						"Dough_In_Temp",
 						"Acid_Temp",
