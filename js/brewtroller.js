@@ -286,9 +286,9 @@ Brewtroller.program = {
 	  	  $i = 1,
 	  	  recipe = beerJSON.RECIPE,
 	  	  name = recipe.NAME,
-	  	  batchSize = beerJSON["RECIPE"]["BATCH_SIZE"],
+	  	  batchSize = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["BATCH_SIZE"]), "volume", "metric", btUnits)).toFixed(1),
 	  	  grainWeight = 0,
-	  	  grainRatio = parseFloat(beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"]["WATER_GRAIN_RATIO"]),
+		  grainRatio = 0,
 	  	  doughInTemp = 0, //beerJSON["RECIPE"]["DOUGHINTEMP"],
 	  	  doughInTime = "0", //beerJSON["RECIPE"]["DOUGHINMINUTES"],
 	  	  acidTemp = 0, //beerJSON["RECIPE"]["ACIDTEMP"],
@@ -302,36 +302,45 @@ Brewtroller.program = {
 	  	  saccTime2 = "0",
 	  	  mashOutTemp = 0,
 	  	  mashOutTime = "0",
-	  	  spargeTemp = beerJSON["RECIPE"]["MASH"]["SPARGE_TEMP"],
-	  	  boilTime = beerJSON["RECIPE"]["BOIL_TIME"],
-		  chillTemp = beerJSON["RECIPE"]["PRIMARY_TEMP"];
+	  	  spargeTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["MASH"]["SPARGE_TEMP"]),"temperature","metric", btUnits)).toFixed(0),
+	  	  boilTime = parseInt(beerJSON["RECIPE"]["BOIL_TIME"]),
+		  chillTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["PRIMARY_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
+		  ratio = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"][0]["WATER_GRAIN_RATIO"]; //The first entry should be the infusion (need to confirm)?
+		  if (ratio.lastIndexOf('qt/lb') != -1){
+		      ratio = parseFloat(ratio);
+		      grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
+		  } else if (ratio.lastIndexOf('l/kg')){
+		      ratio = parseFloat(ratio);
+		      grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
+		  }
 	  $.each(beerJSON["RECIPE"]["FERMENTABLES"]["FERMENTABLE"], function(index, value) {
 		  grainWeight = grainWeight + parseFloat(value["AMOUNT"]);
 		});
+		grainWeight = Number(correctUnits(grainWeight,"weight","metric",btUnits)).toFixed(2);
 	  $.each(beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"], function(index, value) {
 		if(value["NAME"] == "Protein Rest") {
 			proteinRest = value;
 		}else if (value["NAME"] == "Saccharification") {
 			saccRest = value;
-		}else if (value["NAME"] == "mashOut") {
+		}else if (value["NAME"] == "Mash Out") {
 			mashOut = value;
 		}
 	  });
 	  if (proteinRest) {
-		  proteinTemp = proteinRest["STEP_TEMP"];
-		  proteinTime = proteinRest["STEP_TIME"];
+		  proteinTemp = Number(correctUnits(parseFloat(proteinRest["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
+		  proteinTime = parseInt(proteinRest["STEP_TIME"]);
 	  	  }	
 	  if (saccRest) {
-		  saccTemp = saccRest["STEP_TEMP"];
-		  saccTime = saccRest["STEP_TIME"];
+		  saccTemp = Number(correctUnits(parseFloat(saccRest["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
+		  saccTime = parseInt(saccRest["STEP_TIME"]);
 		  }
 	  if (saccRest2) {
-		  saccTemp2 = saccRest2["STEP_TEMP"];
-		  saccTime2 = saccRest2["STEP_TIME"];
+		  saccTemp2 = Number(correctUnits(parseFloat(saccRest2["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
+		  saccTime2 = parseInt(saccRest2["STEP_TIME"]);
 		  }
 	  if (mashOut) {
-		  mashOutTemp = mashOut["STEP_TEMP"];
-		  mashOutTime = mashOut["STEP_TIME"];
+		  mashOutTemp = Number(correctUnits(parseFloat(mashOut["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
+		  mashOutTime = parseInt(mashOut["STEP_TIME"]);
 		  }
 	  
 	  if(beerJSON["RECIPE"]["HOPS"]["HOP"][0]) {
@@ -354,7 +363,7 @@ Brewtroller.program = {
 			  recipeSlot,
 			  {
 			      "Sparge_Temp": spargeTemp,
-				  "HLT_Setpoint": "0", //HLT Setpoint
+				  "HLT_Setpoint": spargeTemp, //HLT Setpoint
 				  "Boil_Mins": boilTime,
 				  "Pitch_Temp": chillTemp,
 				  "Boil_Additions": hopBitMask,
