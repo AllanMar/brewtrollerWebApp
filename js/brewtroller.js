@@ -163,7 +163,7 @@ Brewtroller.connected = {
     },    
     loop : function () {
       if(connected === true) {
-		  if (btVersion == 0) {
+		  if (btVersion === 0) {
 			  brewTrollerExecCommand(BTCMD_GetVersion, null, {}, host, username, password, Brewtroller.status.updateVersion);
 		  } else {
 			  brewTrollerExecCommand(BTCMD_GetStatus, null, {}, host, username, password, Brewtroller.status.printUI);
@@ -313,7 +313,7 @@ Brewtroller.program = {
 			mashArray[0] = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"];
 		}
 		$.each(mashArray, function(index, value) {
-			if (ratio == "") ratio = value["WATER_GRAIN_RATIO"]; //Use first entry. Need to confirm.
+			if (ratio === "") ratio = value["WATER_GRAIN_RATIO"]; //Use first entry. Need to confirm.
 			var stepTime = parseInt(value["STEP_TIME"]);
 			var stepTemp = Number(correctUnits(parseFloat(value["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
 			if(value["NAME"] == "Protein Rest") {
@@ -445,9 +445,9 @@ Brewtroller.program = {
 	        return input / 2.204;
 	      case "ratio":
   	      return input * 0.9464;
-	    };
+	    }
 	  }
-	}
+	};
 
 //Timer Functions
 Brewtroller.timer = {
