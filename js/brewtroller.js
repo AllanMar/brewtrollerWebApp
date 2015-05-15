@@ -262,11 +262,6 @@ Brewtroller.program = {
   },
   sendRecipeToBrewtroller : function (beerJSON) {
 	  var recipeSlot = $("#loadProgramNumber").val() - 1,
-	  	  doughIn,
-	  	  acidRest,
-	  	  saccRest,
-	  	  saccRest2,
-	  	  mashOut,
 	  	  hopBitMask = "",
 	  	  bitMaskHash = [],
 	  	  bitMaskSplit,
@@ -296,13 +291,13 @@ Brewtroller.program = {
 	  	  acidTime = "0", //beerJSON["RECIPE"]["ACIDMINUTES"],
 	  	  proteinTemp = 0,
 	  	  proteinTime = "0",
-	  	  proteinRest,
 	  	  saccTemp = 0,
 	  	  saccTime = "0",
 	  	  saccTemp2 = 0,
 	  	  saccTime2 = "0",
 	  	  mashOutTemp = 0,
 	  	  mashOutTime = "0",
+	  	  mashArray = [],
 	  	  spargeTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["MASH"]["SPARGE_TEMP"]),"temperature","metric", btUnits)).toFixed(0),
 	  	  boilTime = parseInt(beerJSON["RECIPE"]["BOIL_TIME"]),
 		  chillTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["PRIMARY_TEMP"]),"temperature","metric", btUnits)).toFixed(0);	  
@@ -311,28 +306,27 @@ Brewtroller.program = {
 		  grainWeight = grainWeight + parseFloat(value["AMOUNT"]);
 		});
 		grainWeight = Number(correctUnits(grainWeight,"weight","metric",btUnits)).toFixed(2);
-		if (beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"].isArray) {
-			$.each(beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"], function(index, value) {
-			if (ratio == "") ratio = value["WATER_GRAIN_RATIO"]; //The first entry should be the best to use (need to confirm)?
-			if(value["NAME"] == "Protein Rest") {
-				proteinRest = value;
-			}else if (value["NAME"] == "Saccharification") {
-				saccRest = value;
-			}else if (value["NAME"] == "Mash Out") {
-				mashOut = value;
-			}
-		  });
+		
+		if (beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"].isArray) { //If MASH_STEP is not array, convert it to one (for further processing).
+			mashArray = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"];
 		} else {
-			value = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"];
-			ratio = value["WATER_GRAIN_RATIO"];
-			if(value["NAME"] == "Protein Rest") {
-				proteinRest = value;
-			} else if (value["NAME"] == "Mash Out") {
-				mashOut = value;
-			} else { //There is only 1 step so default to Sacch
-				saccRest = value;
-			}
+			mashArray[0] = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"];
 		}
+		$.each(mashArray, function(index, value) {
+			if (ratio == "") ratio = value["WATER_GRAIN_RATIO"]; //Use first entry. Need to confirm.
+			var stepTime = parseInt(value["STEP_TIME"]);
+			var stepTemp = Number(correctUnits(parseFloat(value["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
+			if(value["NAME"] == "Protein Rest") {
+				proteinTime = stepTime;
+				proteinTemp = stepTemp;
+			}else if (value["NAME"] == "Saccharification" || mashArray.length == 1) { //If only one entry use as Saach
+				saccTime = stepTime;
+				saccTemp = stepTemp;
+			}else if (value["NAME"] == "Mash Out") {
+				mashOutTemp = stepTemp;
+				mashOutTime = stepTime;
+			}
+	  });
 	  if (ratio.lastIndexOf('qt/lb') != -1){
 		  ratio = parseFloat(ratio);
 		  grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
@@ -340,23 +334,7 @@ Brewtroller.program = {
 		  ratio = parseFloat(ratio);
 		  grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
 	  }
-	  if (proteinRest) {
-		  proteinTemp = Number(correctUnits(parseFloat(proteinRest["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
-		  proteinTime = parseInt(proteinRest["STEP_TIME"]);
-	  	  }	
-	  if (saccRest) {
-		  saccTemp = Number(correctUnits(parseFloat(saccRest["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
-		  saccTime = parseInt(saccRest["STEP_TIME"]);
-		  }
-	  if (saccRest2) {
-		  saccTemp2 = Number(correctUnits(parseFloat(saccRest2["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
-		  saccTime2 = parseInt(saccRest2["STEP_TIME"]);
-		  }
-	  if (mashOut) {
-		  mashOutTemp = Number(correctUnits(parseFloat(mashOut["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
-		  mashOutTime = parseInt(mashOut["STEP_TIME"]);
-		  }
-	  
+
 	  if(beerJSON["RECIPE"]["HOPS"]["HOP"][0]) {
 	  $.each(beerJSON["RECIPE"]["HOPS"]["HOP"], function(index, value){
 		bitMaskSplit = value["TIME"].split(".");
