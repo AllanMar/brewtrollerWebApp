@@ -289,6 +289,7 @@ Brewtroller.program = {
 	  	  batchSize = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["BATCH_SIZE"]), "volume", "metric", btUnits)).toFixed(1),
 	  	  grainWeight = 0,
 		  grainRatio = 0,
+		  ratio = "",
 	  	  doughInTemp = 0, //beerJSON["RECIPE"]["DOUGHINTEMP"],
 	  	  doughInTime = "0", //beerJSON["RECIPE"]["DOUGHINMINUTES"],
 	  	  acidTemp = 0, //beerJSON["RECIPE"]["ACIDTEMP"],
@@ -304,28 +305,41 @@ Brewtroller.program = {
 	  	  mashOutTime = "0",
 	  	  spargeTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["MASH"]["SPARGE_TEMP"]),"temperature","metric", btUnits)).toFixed(0),
 	  	  boilTime = parseInt(beerJSON["RECIPE"]["BOIL_TIME"]),
-		  chillTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["PRIMARY_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
-		  ratio = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"][0]["WATER_GRAIN_RATIO"]; //The first entry should be the infusion (need to confirm)?
-		  if (ratio.lastIndexOf('qt/lb') != -1){
-		      ratio = parseFloat(ratio);
-		      grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
-		  } else if (ratio.lastIndexOf('l/kg')){
-		      ratio = parseFloat(ratio);
-		      grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
-		  }
+		  chillTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["PRIMARY_TEMP"]),"temperature","metric", btUnits)).toFixed(0);	  
+
 	  $.each(beerJSON["RECIPE"]["FERMENTABLES"]["FERMENTABLE"], function(index, value) {
 		  grainWeight = grainWeight + parseFloat(value["AMOUNT"]);
 		});
 		grainWeight = Number(correctUnits(grainWeight,"weight","metric",btUnits)).toFixed(2);
-	  $.each(beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"], function(index, value) {
-		if(value["NAME"] == "Protein Rest") {
-			proteinRest = value;
-		}else if (value["NAME"] == "Saccharification") {
-			saccRest = value;
-		}else if (value["NAME"] == "Mash Out") {
-			mashOut = value;
+		if (beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"].isArray) {
+			$.each(beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"], function(index, value) {
+			if (ratio == "") ratio = value["WATER_GRAIN_RATIO"]; //The first entry should be the best to use (need to confirm)?
+			if(value["NAME"] == "Protein Rest") {
+				proteinRest = value;
+			}else if (value["NAME"] == "Saccharification") {
+				saccRest = value;
+			}else if (value["NAME"] == "Mash Out") {
+				mashOut = value;
+			}
+		  });
+		} else {
+			value = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"];
+			ratio = value["WATER_GRAIN_RATIO"];
+			if(value["NAME"] == "Protein Rest") {
+				proteinRest = value;
+			} else if (value["NAME"] == "Mash Out") {
+				mashOut = value;
+			} else { //There is only 1 step so default to Sacch
+				saccRest = value;
+			}
 		}
-	  });
+	  if (ratio.lastIndexOf('qt/lb') != -1){
+		  ratio = parseFloat(ratio);
+		  grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
+	  } else if (ratio.lastIndexOf('l/kg')){
+		  ratio = parseFloat(ratio);
+		  grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
+	  }
 	  if (proteinRest) {
 		  proteinTemp = Number(correctUnits(parseFloat(proteinRest["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
 		  proteinTime = parseInt(proteinRest["STEP_TIME"]);
