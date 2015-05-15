@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<!-- Optional theme -->
+<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="css/jquery.sidr.light.css">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/slider.css">
+<!-- User Defined CSS Preferences  -->
+<link rel="stylesheet" href="css/userprefs.css">
+
+<!--  Pulled Font-Awesome for NHC with no Internet Access -->
+<!-- <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"> -->
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="framework/jquery-1.11.1.min.js"></script>
+<script src="framework/bootstrap.min.js"></script>
+<script src="framework/filereader.js"></script>
+<script src="framework/jquery.xml2json.js"></script>
+<script src="framework/bootstrap-slider.js"></script>
+<script src="framework/gauge.js"></script>
+<script src="framework/jquery.gauge.js"></script>
+
+
+<script src="js/brewtroller.js"></script>
+<script src="js/cgiByteCodeMap.js"></script>
+<script>
+	var progIndex = 6;
+	var btProg = new Brewtroller.progData(progIndex);
+	brewTrollerExecCommand(BTCMD_GetProgram, progIndex, {}, "192.168.1.187:8080", username, password, function (data) { btProg.loadFromGetProgram(data); } );
+	wait();
+	
+	function wait(){
+		  if (!btProg.isLoaded()){
+		    setTimeout(wait,100);
+		  } else {
+		    //btProg.genSetProgramParams();
+		    brewTrollerExecCommand(BTCMD_SetProgram, 1, btProg.genSetProgramParams(), "127.0.0.1", username, password, function () {});
+		  }
+		}
+</script>

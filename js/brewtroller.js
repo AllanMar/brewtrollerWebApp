@@ -13,6 +13,129 @@ var programName2;
 var btVersion = 0.0;
 var btUnits = "imperial";
 
+//Inspired/Copied from BT Live Project
+Brewtroller.progData = function (recipeSlot) {
+	//Always stored in same units as BT
+	var pSlot = recipeSlot;
+	var isLoaded = false;
+	
+	var name;
+	var batchVolume;
+	
+	var grainWeight;
+	var mashRatio;
+	
+	var spargeTemp;
+	var hltTemp;
+	var pitchTemp;	
+	var boilTime;
+	
+	var strikeHeat = "0"; //TODO: make default user-configurable.
+	
+	var mashSteps = {};
+	var boilAdditions = {};
+	
+	mashSteps = {
+			doughIn:{step: "Dough In", time: 0, temp: 0},
+			acid:{step: "Acid Rest", 	time: 0, temp: 0},
+			protein:{step: "Protein Rest",	time: 0, temp: 0},
+			sacch:{step: "Saccharification",	time: 0, temp: 0},
+			sacch2:{step: "Saccharification 2",	time: 0, temp: 0},
+			mashOut:{step: "Mash Out",		time: 0, temp: 0}
+	};
+	boilAdditions = {
+			atboil:{time: "At Boil", state: false, bitmask: 1},
+			at105:{time: 105, state: false, bitmask: 2},
+			at90:{time: 90,  state: false, bitmask: 4},
+			at75:{time: 75,  state: false, bitmask: 8},
+			at60:{time: 60,  state: false, bitmask: 16},
+			at45:{time: 45,  state: false, bitmask: 32},
+			at30:{time: 30,  state: false, bitmask: 64},
+			at20:{time: 20,  state: false, bitmask: 128},
+			at15:{time: 15,  state: false, bitmask: 256},
+			at10:{time: 10,  state: false, bitmask: 512},
+			at5:{time: 5,   state: false, bitmask: 1024},
+			at0:{time: 0,   state: false, bitmask: 2048}
+	};
+	this.isLoaded = function () {
+		return isLoaded;
+	};
+	
+	this.getBoilAddBitmask = function () {
+		var boilBitmask = 0;
+		$.each(boilAdditions, function(key, value) {
+			if(value.state) boilBitmask =  boilBitmask | value.bitmask;
+		});
+		return boilBitmask;
+	};
+	this.loadFromGetProgram = function (btResp) { // Takes BTResp object and loads Prog Data.
+		name = btResp["name"];
+		
+		batchVolume = parseInt(btResp["batchVolume"])/1000;
+		grainWeight = parseInt(btResp["grainWeight"])/1000;
+		mashRatio = parseInt(btResp["mashRatio"])/100;
+		spargeTemp = parseInt(btResp["spargeTemperature"]);
+		hltTemp = parseInt(btResp["hltTemperature"]);
+		boilTime = parseInt(btResp["boilMinutes"]);
+		pitchTemp = parseInt(btResp["pitchTemperature"]);
+		strikeHeat = btResp["strikeHeatSource"]; //TODO: Determine assignment	
+		
+		mashSteps.doughIn.temp = parseInt(btResp["mashDoughIn_Temperature"]);
+		mashSteps.doughIn.time = parseInt(btResp["mashDoughIn_Minutes"]);
+		
+		mashSteps.acid.temp = parseInt(btResp["mashAcid_Temperature"]);
+		mashSteps.acid.time = parseInt(btResp["mashAcid_Minutes"]);
+		
+		mashSteps.protein.temp = parseInt(btResp["mashProtein_Temperature"]);
+		mashSteps.protein.time = parseInt(btResp["mashProtein_Minutes"]);
+		
+		mashSteps.sacch.temp = parseInt(btResp["mashSacch_Temperature"]);
+		mashSteps.sacch.time = parseInt(btResp["mashSacch_Minutes"]);
+		
+		mashSteps.sacch2.temp = parseInt(btResp["mashSacch2_Temperature"]);
+		mashSteps.sacch2.time = parseInt(btResp["mashSacch2_Minutes"]);
+		
+		mashSteps.mashOut.temp = parseInt(btResp["mashMashOut_Temperature"]);
+		mashSteps.mashOut.time = parseInt(btResp["mashMashOut_Minutes"]);
+		
+		$.each(boilAdditions, function(key, value) {
+		    value.state = Boolean(parseInt(btResp["boilAdditions"])&value.bitmask);
+		});
+		
+		isLoaded = true;
+	};
+	
+	this.genSetProgramParams = function () { // Generate parameters for SetProgram BT command
+        var btParams = {};
+        btParams = {
+	        "name": name,
+	        "batchVolume": batchVolume*1000,
+	        "grainWeight": grainWeight*1000,
+	        "mashRatio": mashRatio*100,
+	        "mashDoughIn_Temperature": mashSteps.doughIn.temp,
+	        "mashDoughIn_Minutes": mashSteps.doughIn.time,
+	        "mashAcid_Temperature": mashSteps.acid.temp,
+	        "mashAcid_Minutes": mashSteps.acid.time,
+	        "mashProtein_Temperature": mashSteps.protein.temp,
+	        "mashProtein_Minutes": mashSteps.protein.time,
+	        "mashSacch_Temperature": mashSteps.sacch.temp,
+	        "mashSacch_Minutes": mashSteps.sacch.time,
+	        "mashSacch2_Temperature": mashSteps.sacch2.temp,
+	        "mashSacch2_Minutes": mashSteps.sacch2.time,
+	        "mashMashOut_Temperature": mashSteps.mashOut.temp,
+	        "mashMashOut_Minutes": mashSteps.mashOut.time,
+	        "spargeTemperature": spargeTemp,
+	        "hltTemperature": hltTemp,
+	        "boilMinutes": boilTime,
+	        "pitchTemperature": pitchTemp,
+	        "boilAdditions": this.getBoilAddBitmask(),
+	        "strikeHeatSource": strikeHeat
+        };
+        
+        return btParams;
+	};
+
+};
 //Brewtroller Web Init
 Brewtroller.init = function () {
   $('#button_connect').on("click", function() {

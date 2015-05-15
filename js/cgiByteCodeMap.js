@@ -363,6 +363,68 @@ var BTCMD_SetProgramSettings = {
 	                  "Mash_Liquor_Heat_Source"
 	                  ]
 	};
+
+var BTCMD_SetProgram = {
+	      reqCode: '%3F',
+	      reqIndex: true,
+	      reqParams: [
+		            "name",
+		            "batchVolume",
+		            "grainWeight",
+		            "mashRatio",
+		            "mashDoughIn_Temperature",
+		            "mashDoughIn_Minutes",
+		            "mashAcid_Temperature",
+		            "mashAcid_Minutes",
+		            "mashProtein_Temperature",
+		            "mashProtein_Minutes",
+		            "mashSacch_Temperature",
+		            "mashSacch_Minutes",
+		            "mashSacch2_Temperature",
+		            "mashSacch2_Minutes",
+		            "mashMashOut_Temperature",
+		            "mashMashOut_Minutes",
+		            "spargeTemperature",
+		            "hltTemperature",
+		            "boilMinutes",
+		            "pitchTemperature",
+		            "boilAdditions",
+		            "strikeHeatSource"
+	                  ],
+          rspCode: '@',
+          rspParams: [
+	            "name",
+	            "batchVolume",
+	            "grainWeight",
+	            "mashRatio",
+	            "mashDoughIn_Temperature",
+	            "mashDoughIn_Minutes",
+	            "mashAcid_Temperature",
+	            "mashAcid_Minutes",
+	            "mashProtein_Temperature",
+	            "mashProtein_Minutes",
+	            "mashSacch_Temperature",
+	            "mashSacch_Minutes",
+	            "mashSacch2_Temperature",
+	            "mashSacch2_Minutes",
+	            "mashMashOut_Temperature",
+	            "mashMashOut_Minutes",
+	            "spargeTemperature",
+	            "hltTemperature",
+	            "boilMinutes",
+	            "pitchTemperature",
+	            "boilAdditions",
+	            "strikeHeatSource",
+	            "calcStrikeTemperature",
+	            "firstStepTemperature",
+	            "calcPreboilVolume",
+	            "calcStrikeVolume",
+	            "calcSpargeVolume",
+	            "calcGrainVolume",
+	            "calcGrainLiquorLoss"
+          ]
+	};
+
 var BTCMD_GetValveProfileConfig = {
 	reqCode: 'd',
 	reqIndex: true,
