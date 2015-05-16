@@ -23,6 +23,7 @@
 <script src="js/brewtroller.js"></script>
 <script src="js/cgiByteCodeMap.js"></script>
 <script>
+/*
 	var progIndex = 6;
 	var btProg = new Brewtroller.progData(progIndex);
 	brewTrollerExecCommand(BTCMD_GetProgram, progIndex, {}, "192.168.1.187:8080", username, password, function (data) { btProg.loadFromGetProgram(data); } );
@@ -36,4 +37,36 @@
 		    brewTrollerExecCommand(BTCMD_SetProgram, 1, btProg.genSetProgramParams(), "127.0.0.1", username, password, function () {});
 		  }
 		}
+	*/
+	window.onload = function() {
+		var fileInput = document.getElementById('fileInput');
+		var fileDisplayArea = document.getElementById('fileDisplayArea');
+
+		fileInput.addEventListener('change', function(e) {
+			var file = fileInput.files[0];
+			var textType = /text.*/;
+
+				var reader = new FileReader();
+
+				reader.onload = function(e) {
+			        // browser completed reading file - display it
+			  	    var beerXML = e.target.result;
+			  	  	var progIndex = 6;
+			  		var btProg = new Brewtroller.progData(progIndex);
+			  		btProg.loadFromBeerXML(beerXML);
+			    };
+			    
+				reader.readAsText(file);	
+		});
+}
 </script>
+<div id="page-wrapper">
+
+		<h1>Text File Reader</h1>
+		<div>
+			Select a text file: 
+			<input type="file" id="fileInput">
+		</div>
+		<pre id="fileDisplayArea"><pre>
+
+	</div>

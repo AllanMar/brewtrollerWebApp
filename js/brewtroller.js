@@ -15,27 +15,24 @@ var btUnits = "imperial";
 
 //Inspired/Copied from BT Live Project
 Brewtroller.progData = function (recipeSlot) {
-	//Always stored in same units as BT
+	//Always stored in same units as BT (btUnits)
 	var pSlot = recipeSlot;
 	var isLoaded = false;
 	
-	var name;
-	var batchVolume;
+	var name = "";
+	var batchVolume = 0;
 	
-	var grainWeight;
-	var mashRatio;
+	var grainWeight = 0;
+	var mashRatio = 0;
 	
-	var spargeTemp;
-	var hltTemp;
-	var pitchTemp;	
-	var boilTime;
+	var spargeTemp = 0;
+	var hltTemp = 0;
+	var pitchTemp = 0;	
+	var boilTime = 0;
 	
 	var strikeHeat = "0"; //TODO: make default user-configurable.
 	
-	var mashSteps = {};
-	var boilAdditions = {};
-	
-	mashSteps = {
+	var mashSteps = {
 			doughIn:{step: "Dough In", time: 0, temp: 0},
 			acid:{step: "Acid Rest", 	time: 0, temp: 0},
 			protein:{step: "Protein Rest",	time: 0, temp: 0},
@@ -43,7 +40,7 @@ Brewtroller.progData = function (recipeSlot) {
 			sacch2:{step: "Saccharification 2",	time: 0, temp: 0},
 			mashOut:{step: "Mash Out",		time: 0, temp: 0}
 	};
-	boilAdditions = {
+	var boilAdditions = {
 			atboil:{time: "At Boil", state: false, bitmask: 1},
 			at105:{time: 105, state: false, bitmask: 2},
 			at90:{time: 90,  state: false, bitmask: 4},
@@ -57,18 +54,19 @@ Brewtroller.progData = function (recipeSlot) {
 			at5:{time: 5,   state: false, bitmask: 1024},
 			at0:{time: 0,   state: false, bitmask: 2048}
 	};
-	this.isLoaded = function () {
-		return isLoaded;
-	};
 	
+	this.isLoaded = function () {
+		return this.isLoaded;
+	};
 	this.getBoilAddBitmask = function () {
 		var boilBitmask = 0;
-		$.each(boilAdditions, function(key, value) {
+		$.each(this.boilAdditions, function(key, value) {
 			if(value.state) boilBitmask =  boilBitmask | value.bitmask;
 		});
 		return boilBitmask;
 	};
-	this.loadFromGetProgram = function (btResp) { // Takes BTResp object and loads Prog Data.
+	
+	this.loadFromGetProgram = function (btResp) { // Takes BTResp object and loads Prog data.
 		name = btResp["name"];
 		
 		batchVolume = parseInt(btResp["batchVolume"])/1000;
@@ -104,7 +102,6 @@ Brewtroller.progData = function (recipeSlot) {
 		
 		isLoaded = true;
 	};
-	
 	this.genSetProgramParams = function () { // Generate parameters for SetProgram BT command
         var btParams = {};
         btParams = {
@@ -135,6 +132,64 @@ Brewtroller.progData = function (recipeSlot) {
         return btParams;
 	};
 
+	this.loadFromBeerXML = function (beerXML) { //Takes BeerXML and loads Prog Data
+		var beerJSON = $.xml2json(beerXML, true); //Use extended mode. Not as clean but safer for items that don't always have multiple items (hops/grain/mash steps).
+		
+		var recipe = beerJSON["RECIPE"][0];
+		var xmlMashSteps = recipe["MASH"][0]["MASH_STEPS"][0]["MASH_STEP"];
+		var xmlGrains =  recipe["FERMENTABLES"][0]["FERMENTABLE"];
+		var xmlHops = recipe["HOPS"][0]["HOP"];
+		
+		var xmlGrainWeight = 0;
+		var xmlGrainRatio = "";
+		
+		name = recipe["NAME"][0].text.substring(0,19); //Limit to 20Chars.
+		batchVolume = Number(correctUnits(parseFloat(recipe["BATCH_SIZE"][0].text), "volume", "metric", btUnits)).toFixed(1);
+		spargeTemp = Number(correctUnits(parseFloat(recipe["MASH"][0]["SPARGE_TEMP"][0].text),"temperature","metric", btUnits)).toFixed(0);
+		hltTemp = spargeTemp; // Use sparge temp as HLT Target (need to confirm)
+		boilTime = parseInt(recipe["BOIL_TIME"][0].text);
+		pitchTemp = Number(correctUnits(parseFloat(recipe["PRIMARY_TEMP"][0].text),"temperature","metric", btUnits)).toFixed(0);	
+	  	//this.strikeHeat = "0"; //leave at default, not contained in XML  
+		
+		//Add up the weight of all grains.
+		$.each(xmlGrains, function(index, value) {
+			  xmlGrainWeight += parseFloat(value["AMOUNT"][0].text);
+		});
+		grainWeight = Number(correctUnits(xmlGrainWeight,"weight","metric",btUnits)).toFixed(2);
+		
+		//Get Mash step info
+		var stepsLoaded = 0;
+		$.each(xmlMashSteps, function(index, mashStep) {
+			var stepTime = parseInt(mashStep["STEP_TIME"][0].text);
+			var stepTemp = Number(correctUnits(parseFloat(mashStep["STEP_TEMP"][0].text),"temperature","metric", btUnits)).toFixed(0);
+			if (index===0) xmlGrainRatio = mashStep["WATER_GRAIN_RATIO"][0].text; //Always taking grain ratio from first mash step (need to confirm)
+			
+			$.each(mashSteps, function(index, btMashStep) {
+				if (mashStep["NAME"][0].text == btMashStep.step ) { //TODO: Deal with other XML step names.
+					btMashStep.temp = stepTemp;
+					btMashStep.time = stepTime;
+					stepsLoaded++;
+				}
+			});
+		});
+		
+		var ratioUnits = (xmlGrainRatio.lastIndexOf('l/kg')!=-1 ? "metric" : "imperial"); //If not l/kg (metric) default to qt/lbs (imperial). (need to confirm)
+		mashRatio = Number(correctUnits(parseFloat(xmlGrainRatio), "ratio", ratioUnits, btUnits).toFixed(2));
+		
+		//Get boil addition times.
+		var hopsLoaded = 0;
+		$.each(xmlHops, function(index, xmlHop){
+			 var hopTime = parseInt(xmlHop["TIME"][0].text);
+			 $.each(boilAdditions, function(index, btHop){ //TODO: Deal with XML hop times that don't exactly match BT hop times.
+				 if (btHop.time == hopTime) {
+					 btHop.state = true;
+					 hopsLoaded++;
+				 }
+			 });
+		});
+		
+		isLoaded = true;	
+	};
 };
 //Brewtroller Web Init
 Brewtroller.init = function () {
