@@ -65,7 +65,7 @@
     
     function printFlowRate(id, flowrate)
     {
-        $(id).html('<small class="text-muted">flow rate </small>' + flowrate + " Gal/min");
+        $(id).html('<small class="text-muted">flow rate </small>' + flowrate/1000.0 + " Gal/min");
     }
 	function printBoilControl(id, data)
 	{
