@@ -443,7 +443,7 @@ Brewtroller.program = {
 	        	    */
 	          };
 		   $("#modal_beerXMLLoader").modal("hide"); 
-		   Brewtroller.program.getProgramList();
+		   //Brewtroller.program.getProgramList(); This is being run before the new program is sent. Why?
 	      }
   },
   sendRecipeToBrewtroller : function (beerJSON) {
