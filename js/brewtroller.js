@@ -105,36 +105,70 @@ Brewtroller.progData = function (recipeSlot) {
 		
 		isLoaded = true;
 	};
-	this.genSetProgramParams = function () { // Generate parameters for SetProgram BT command
+	this.genSetProgram = function () { // BROKEN: Generate parameters for SetProgram BT command
         var btParams = {};
         btParams = {
-	        "name": name,
-	        "batchVolume": batchVolume*1000,
-	        "grainWeight": grainWeight*1000,
-	        "mashRatio": mashRatio*100,
-	        "mashDoughIn_Temperature": mashSteps.doughIn.temp,
-	        "mashDoughIn_Minutes": mashSteps.doughIn.time,
-	        "mashAcid_Temperature": mashSteps.acid.temp,
-	        "mashAcid_Minutes": mashSteps.acid.time,
-	        "mashProtein_Temperature": mashSteps.protein.temp,
-	        "mashProtein_Minutes": mashSteps.protein.time,
-	        "mashSacch_Temperature": mashSteps.sacch.temp,
-	        "mashSacch_Minutes": mashSteps.sacch.time,
-	        "mashSacch2_Temperature": mashSteps.sacch2.temp,
-	        "mashSacch2_Minutes": mashSteps.sacch2.time,
-	        "mashMashOut_Temperature": mashSteps.mashOut.temp,
-	        "mashMashOut_Minutes": mashSteps.mashOut.time,
-	        "spargeTemperature": spargeTemp,
-	        "hltTemperature": hltTemp,
-	        "boilMinutes": boilTime,
-	        "pitchTemperature": pitchTemp,
-	        "boilAdditions": this.getBoilAddBitmask(),
-	        "strikeHeatSource": strikeHeat
         };
         
         return btParams;
 	};
-
+	this.genSetProgramName = function () { // Generate parameters for ProgramName BT command
+        var btParams = {};
+        btParams = {
+	        "Program_Name": name
+        };
+        return btParams;
+	};
+	this.genSetProgramSettings = function () { // Generate parameters for ProgramSettings BT command
+        var btParams = {};
+        btParams = {
+		      "Sparge_Temp": spargeTemp,
+			  "HLT_Setpoint": hltTemp,
+			  "Boil_Mins": boilTime,
+			  "Pitch_Temp": pitchTemp,
+			  "Boil_Additions": this.getBoilAddBitmask(),
+			  "Mash_Liquor_Heat_Source": strikeHeat
+        };
+        
+        return btParams;
+	};
+	this.genSetProgramVolumes = function () { // Generate parameters for ProgramVolumes BT command
+        var btParams = {};
+        btParams = {
+    		  "Batch_Volume": batchVolume*1000,
+    		  "Grain_Weight": grainWeight*1000,
+    		  "Mash_Ratio": mashRatio*100
+        };
+        
+        return btParams;
+	};
+	this.genSetProgramMashTemps = function () { // Generate parameters for ProgramMashTemps BT command
+        var btParams = {};
+        btParams = {
+        	  "Dough_In_Temp": mashSteps.doughIn.temp,
+    		  "Acid_Temp": mashSteps.acid.temp,
+    		  "Protein_Temp": mashSteps.protein.temp,
+    		  "Sacch_Temp": mashSteps.sacch.temp,
+    		  "Sacch2_Temp": mashSteps.sacch2.temp,
+    		  "Mash_Out_Temp": mashSteps.mashOut.temp
+        };
+        
+        return btParams;
+	};
+	this.genSetProgramMashMins = function () { // Generate parameters for ProgramMashMins BT command
+        var btParams = {};
+        btParams = {
+        	  "Dough_In_Mins": mashSteps.doughIn.time,
+    		  "Acid_Mins": mashSteps.acid.time,
+    		  "Protein_Mins": mashSteps.protein.time,
+    		  "Sacch_Mins": mashSteps.sacch.time,
+    		  "Sacch2_Mins": mashSteps.sacch2.time,
+    		  "Mash_Out_Mins": mashSteps.mashOut.time
+        };
+        
+        return btParams;
+	};
+	  
 	this.loadFromBeerXML = function (beerXML) { //Takes BeerXML and loads Prog Data
 		var beerJSON = $.xml2json(beerXML, true); //Use extended mode. Not as clean but safer for items that don't always have multiple items (hops/grain/mash steps).
 		
@@ -434,9 +468,13 @@ Brewtroller.program = {
 	          reader.onload = function(e) {
 	              // browser completed reading file - display it
 	        	    var beerXML = e.target.result;
-	        	    var progData = new Brewtroller.progData($("#loadProgramNumber").val() - 1);
-	        	    progData.loadFromBeerXML(beerXML);
-	        	    brewTrollerExecCommand(BTCMD_SetProgram, btProg.getPSlot(), btProg.genSetProgramParams(), host, username, password, function () {}); //TODO: Check response
+	        	    var btProg = new Brewtroller.progData($("#loadProgramNumber").val() - 1);
+	        	    btProg.loadFromBeerXML(beerXML);
+	        	    brewTrollerExecCommand(BTCMD_SetProgramName, btProg.getPSlot(), btProg.genSetProgramName(), host, username, password, function (data) {}); //TODO: Check response
+	        	    brewTrollerExecCommand(BTCMD_SetProgramSettings, btProg.getPSlot(), btProg.genSetProgramSettings(), host, username, password, function (data) {});
+	        	    brewTrollerExecCommand(BTCMD_SetProgramVolumes, btProg.getPSlot(), btProg.genSetProgramVolumes(), host, username, password, function (data) {});
+	        	    brewTrollerExecCommand(BTCMD_SetProgramMashTemps, btProg.getPSlot(), btProg.genSetProgramMashTemps(), host, username, password, function (data) {});
+	        	    brewTrollerExecCommand(BTCMD_SetProgramMashMins, btProg.getPSlot(), btProg.genSetProgramMashMins(), host, username, password, function (data) {});
 	        	    /*
 	        	    var beerJSON = $.xml2json(beerXML);
 	        	    Brewtroller.program.sendRecipeToBrewtroller(beerJSON);
