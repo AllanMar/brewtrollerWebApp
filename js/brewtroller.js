@@ -33,12 +33,12 @@ Brewtroller.progData = function (recipeSlot) {
 	var strikeHeat = "0"; //TODO: make default user-configurable.
 	
 	var mashSteps = {
-			doughIn:{step: "Dough In", time: 0, temp: 0},
-			acid:{step: "Acid Rest", 	time: 0, temp: 0},
-			protein:{step: "Protein Rest",	time: 0, temp: 0},
-			sacch:{step: "Saccharification",	time: 0, temp: 0},
-			sacch2:{step: "Saccharification 2",	time: 0, temp: 0},
-			mashOut:{step: "Mash Out",		time: 0, temp: 0}
+			doughIn:{names: ["Dough In"], time: 0, temp: 0},
+			acid:{names: ["Acid Rest"], 	time: 0, temp: 0},
+			protein:{names: ["Protein Rest"],	time: 0, temp: 0},
+			sacch:{names: ["Saccharification", "Mash In"],	time: 0, temp: 0},
+			sacch2:{names: ["Saccharification 2"],	time: 0, temp: 0},
+			mashOut:{names: ["Mash Out"],		time: 0, temp: 0}
 	};
 	var boilAdditions = {
 			atboil:{time: "At Boil", state: false, bitmask: 1},
@@ -196,20 +196,23 @@ Brewtroller.progData = function (recipeSlot) {
 		
 		//Get Mash step info
 		var stepsLoaded = 0;
+		var xmlSteps = xmlMashSteps.length();
 		$.each(xmlMashSteps, function(index, mashStep) {
 			var stepTime = parseInt(mashStep["STEP_TIME"][0].text);
 			var stepTemp = Number(correctUnits(parseFloat(mashStep["STEP_TEMP"][0].text),"temperature","metric", btUnits)).toFixed(0);
 			if (index===0) xmlGrainRatio = mashStep["WATER_GRAIN_RATIO"][0].text; //Always taking grain ratio from first mash step (need to confirm)
 			
 			$.each(mashSteps, function(btIndex, btMashStep) {
-				if (mashStep["NAME"][0].text == btMashStep.step ) { //TODO: Deal with other XML step names.
-					btMashStep.temp = stepTemp;
-					btMashStep.time = stepTime;
-					stepsLoaded++;
-				}
+				$.each(btMashStep.names, function(btIndex, btMashStepName) {
+					if (mashStep["NAME"][0].text == btMashStepName ) { 
+						btMashStep.temp = stepTemp;
+						btMashStep.time = stepTime;
+						stepsLoaded++;
+					}
+				});
 			});
 		});
-		
+		if (stepsLoaded != xmlSteps)  throw new Warning("BTWebApp BeerXML Import: Missed Mash Steps (XML=" + xmlSteps + " Imported=" + stepsLoaded);
 		var ratioUnits = (xmlGrainRatio.lastIndexOf('l/kg')!=-1 ? "metric" : "imperial"); //If not l/kg (metric) default to qt/lbs (imperial). (need to confirm)
 		mashRatio = Number(correctUnits(parseFloat(xmlGrainRatio), "ratio", ratioUnits, btUnits).toFixed(2));
 		
