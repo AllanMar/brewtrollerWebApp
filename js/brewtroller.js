@@ -56,11 +56,14 @@ Brewtroller.progData = function (recipeSlot) {
 	};
 	
 	this.isLoaded = function () {
-		return this.isLoaded;
+		return isLoaded;
+	};
+	this.getPSlot = function () {
+		return pSlot;
 	};
 	this.getBoilAddBitmask = function () {
 		var boilBitmask = 0;
-		$.each(this.boilAdditions, function(key, value) {
+		$.each(boilAdditions, function(key, value) {
 			if(value.state) boilBitmask =  boilBitmask | value.bitmask;
 		});
 		return boilBitmask;
@@ -164,7 +167,7 @@ Brewtroller.progData = function (recipeSlot) {
 			var stepTemp = Number(correctUnits(parseFloat(mashStep["STEP_TEMP"][0].text),"temperature","metric", btUnits)).toFixed(0);
 			if (index===0) xmlGrainRatio = mashStep["WATER_GRAIN_RATIO"][0].text; //Always taking grain ratio from first mash step (need to confirm)
 			
-			$.each(mashSteps, function(index, btMashStep) {
+			$.each(mashSteps, function(btIndex, btMashStep) {
 				if (mashStep["NAME"][0].text == btMashStep.step ) { //TODO: Deal with other XML step names.
 					btMashStep.temp = stepTemp;
 					btMashStep.time = stepTime;
@@ -180,7 +183,7 @@ Brewtroller.progData = function (recipeSlot) {
 		var hopsLoaded = 0;
 		$.each(xmlHops, function(index, xmlHop){
 			 var hopTime = parseInt(xmlHop["TIME"][0].text);
-			 $.each(boilAdditions, function(index, btHop){ //TODO: Deal with XML hop times that don't exactly match BT hop times.
+			 $.each(boilAdditions, function(btIndex, btHop){ //TODO: Deal with XML hop times that don't exactly match BT hop times.
 				 if (btHop.time == hopTime) {
 					 btHop.state = true;
 					 hopsLoaded++;
@@ -431,8 +434,13 @@ Brewtroller.program = {
 	          reader.onload = function(e) {
 	              // browser completed reading file - display it
 	        	    var beerXML = e.target.result;
+	        	    var progData = new Brewtroller.progData($("#loadProgramNumber").val() - 1);
+	        	    progData.loadFromBeerXML(beerXML);
+	        	    brewTrollerExecCommand(BTCMD_SetProgram, btProg.getPSlot(), btProg.genSetProgramParams(), host, username, password, function () {}); //TODO: Check response
+	        	    /*
 	        	    var beerJSON = $.xml2json(beerXML);
 	        	    Brewtroller.program.sendRecipeToBrewtroller(beerJSON);
+	        	    */
 	          };
 		   $("#modal_beerXMLLoader").modal("hide"); 
 		   Brewtroller.program.getProgramList();
