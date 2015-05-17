@@ -196,7 +196,7 @@ Brewtroller.progData = function (recipeSlot) {
 		
 		//Get Mash step info
 		var stepsLoaded = 0;
-		var xmlSteps = xmlMashSteps.length();
+		var xmlSteps = xmlMashSteps.length;
 		$.each(xmlMashSteps, function(index, mashStep) {
 			var stepTime = parseInt(mashStep["STEP_TIME"][0].text);
 			var stepTemp = Number(correctUnits(parseFloat(mashStep["STEP_TEMP"][0].text),"temperature","metric", btUnits)).toFixed(0);
@@ -212,7 +212,8 @@ Brewtroller.progData = function (recipeSlot) {
 				});
 			});
 		});
-		if (stepsLoaded != xmlSteps)  throw new Warning("BTWebApp BeerXML Import: Missed Mash Steps (XML=" + xmlSteps + " Imported=" + stepsLoaded);
+		//if (stepsLoaded != xmlSteps)  //TODO: Tell user that we didn't import some steps.
+			
 		var ratioUnits = (xmlGrainRatio.lastIndexOf('l/kg')!=-1 ? "metric" : "imperial"); //If not l/kg (metric) default to qt/lbs (imperial). (need to confirm)
 		mashRatio = Number(correctUnits(parseFloat(xmlGrainRatio), "ratio", ratioUnits, btUnits).toFixed(2));
 		
