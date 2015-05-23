@@ -193,6 +193,7 @@ Brewtroller.init = function () {
 ////		  colorOfCenterCircleFill: "#CCCCCC"
 ////	  }).gauge('setValue', 200);
 //  }
+Brewtroller.valve.buildOutputLEDs("#div_outputLEDs"); 
   $("#outputSave").on("click", function () {
 	  var outputBitmask = [],
   	  bit;
@@ -738,7 +739,7 @@ Brewtroller.status = {
 		printFlowRate("#div_kettleFlowRate", data.Kettle_FlowRate);
 		printBoilControl("#div_boilControl", data.Boil_ControlState);
 	    Brewtroller.valve.printOutputProfiles("#div_outputProfiles", data.profileStatus);
-		printOutputStatus("#div_outputStatus", data.outputStatus);
+	    Brewtroller.valve.printActOutputs("#div_outputLEDs", data.outputStatus);
 		if (data.Boil_ControlState === "2") {
 			$("#powerControl").show();
 			$("#boilManual").parent().button("toggle");
@@ -923,7 +924,22 @@ Brewtroller.valve = {
     		$("#valveSelect").append('<option value="' + index + '">' + value + '</option>');
     	});
     },
-	
+        buildOutputLEDs : function (divId)
+        {
+            
+            for (i = 0; i < 32; i++) { //Current BT max of 32bit
+                var index = i + 1,
+                    name = "" + index,
+                    id = "out" + index,
+                    html = "";  
+                html += '<div class="btn-group-vertical led-box">';
+                html += '<p>' + name + '</p>';
+                html += '<div class="led" id="' + id + '"></div>';
+                html += '</div>';
+
+                $(divId).append(html);
+            }           
+        },
 	printOutputProfiles : function(id, status)
     {
 		$(".valveBtn button").removeClass("btn-danger").addClass("btn-default");
@@ -933,7 +949,15 @@ Brewtroller.valve = {
 			$("#" + value).removeClass("btn-default").addClass("btn-danger");
 		});
 	},
-    
+        printActOutputs : function(id, status)
+    {
+            var actBitmask = parseInt(status);
+            for (i = 0; i < 32; i++) { //Current BT max of 32bit
+                var index = i + 1;
+                var state = (actBitmask&(1<<i) ? true : false);
+                $("#out" + index).toggleClass('led-green', state);
+            }
+	},
     getValveProfileConfig : function (valveProfile) {
     	var currValveProfile;
     	currValveProfile = brewTrollerExecCommand(BTCMD_GetValveProfileConfig,
