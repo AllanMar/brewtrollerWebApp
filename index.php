@@ -395,6 +395,10 @@
 							</div>
 				  		</div>
 				  	</div>
+                                        <div class="row">                                           
+                                            <div class="col-sm-12">
+                                                <div id="div_outputLEDs"></div>
+                                        </div>
 				  </div>
 				  </div>
 				</div>
