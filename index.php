@@ -379,7 +379,7 @@
 							  <button id="kettleLid" type="button" class="btn btn-default">Kettle Lid</button>
 							</div>
 							<div class="btn-group">
-							  <button id="chillerH20" type="button" class="btn btn-default">Chiller H20</button>
+							  <button id="chillerH2O" type="button" class="btn btn-default">Chiller H2O</button>
 							  <button id="chillerBeer" type="button" class="btn btn-default">Chiller Beer</button>
 							  <button id="boilRecirc" type="button" class="btn btn-default">Boil Recirc</button>
 							</div>
