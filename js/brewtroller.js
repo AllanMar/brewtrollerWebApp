@@ -820,109 +820,33 @@ Brewtroller.boil = {
 
 // Valve Control Functions
 Brewtroller.valve = {
-		bitmaskDecimalBinaryConvert : function (bitmask) {
-			var binary = parseInt(bitmask, 10).toString(2);
-			return binary;
-		},
-		
-		bitmaskBinaryDecimalConvert : function (bitmask) {
-			var decimal = parseInt(bitmask, 2);
-			return decimal;
-		},
-		
-		binaryToProfileTranslate : function (binary) {
-			var binaryArray = binary.split(""),
-			activeProfiles = [];
-			binaryArray.reverse();
-			$.each(binaryArray, function (index, value) {
-				if (value === "1") {
-					var activeIndex = Brewtroller.valve.profileTranslateDivId(index);
-					activeProfiles.push(activeIndex);
-				}
-			});
-			return activeProfiles;
-		},
-		
-		profileTranslateNme : function (profileBitmask) {
-		bitmaskName = {
-				"1": "Fill HLT",
-				"2": "Fill Mash",
-				"4": "Add Grain",
-				"8": "Mash Heat",
-				"16": "Mash Idle",
-				"32": "Sparge In",
-				"64": "Sparge Out",
-				"128": "Boil Additions",
-				"256": "Kettle Lid",
-				"512": "Chiller H20",
-				"1024":"Chiller Beer",
-				"2048": "Boil Recirc",
-				"4096": "Drain",
-				"81920": "HLT Heat",
-				"16384": "HLT Idle",
-				"32768": "Kettle Heat",
-				"65536": "Kettle Idle",
-				"131072": "User 1",
-				"262144": "User 2",
-				"524288": "User 3"
-				};
-		return bitmaskName[profileBitmask];
-	},
-	
-	profileTranslateDivId : function (profileBitmask) {
-		bitmaskIdName = {
-				"0": "fillHLT",
-				"1": "fillMash",
-				"2": "addGrain",
-				"3": "mashHeat",
-				"4": "mashIdle",
-				"5": "spargeIn",
-				"6": "spargeOut",
-				"7": "boilAdditions",
-				"8": "kettleLid",
-				"9": "chillerH20",
-				"10":"chillerBeer",
-				"11": "boilRecirc",
-				"12": "drain",
-				"13": "hltHeat",
-				"14": "hltIdle",
-				"15": "kettleHeat",
-				"16": "kettleIdle",
-				"17": "user1",
-				"18": "user2",
-				"19": "user3"
-				};
-		return bitmaskIdName[profileBitmask];
-	},
-    
+    profileData : {
+            0:{name: "Fill HLT", div: "fillHLT", bitmask: 1},
+            1:{name: "Fill Mash", div: "fillMash", bitmask: 2},
+            2:{name: "Add Grain", div: "addGrain", bitmask: 4},
+            3:{name: "Mash Heat", div: "mashHeat", bitmask: 8},
+            4:{name: "Mash Idle", div: "mashIdle", bitmask: 16},
+            5:{name: "Sparge In", div: "spargeIn", bitmask: 32},
+            6:{name: "Sparge Out", div: "spargeOut", bitmask: 64},
+            7:{name: "Boil Additions", div: "boilAdditions", bitmask: 128},
+            8:{name: "Kettle Lid", div: "kettleLid", bitmask: 256},
+            9:{name: "Chill H2O", div: "chillerH2O", bitmask: 512},
+            10:{name: "Chill Beer", div: "chillerBeer", bitmask: 1024},
+            11:{name: "Boil Recirc", div: "boilRecirc", bitmask: 2048},
+            12:{name: "Drain", div: "drain", bitmask: 4096},
+            13:{name: "HLT Heat", div: "hltHeat", bitmask: 8192},
+            14:{name: "HLT Idle", div: "hltIdle", bitmask: 16384},
+            15:{name: "Kettle Heat", div: "kettleHeat",  bitmask: 32768},
+            16:{name: "Kettle Idle", div: "kettleIdle", bitmask: 65536},
+            17:{name: "User 1", div: "user1", bitmask: 131072},
+            18:{name: "User 2", div: "user2", bitmask: 262144},
+            19:{name: "User 3", div: "user3", bitmask: 524288}
+    },
 	buildValveSelectBox : function () 
     {
-    	var bitmaskName = {
-				"0": "Fill HLT",
-				"1": "Fill Mash",
-				"2": "Add Grain",
-				"3": "Mash Heat",
-				"4": "Mash Idle",
-				"5": "Sparge In",
-				"6": "Sparge Out",
-				"7": "Boil Additions",
-				"8": "Kettle Lid",
-				"9": "Chiller H20",
-				"10":"Chiller Beer",
-				"11": "Boil Recirc",
-				"12": "Drain",
-				"13": "HLT Heat",
-				"14": "HLT Idle",
-				"15": "Kettle Heat",
-				"16": "Kettle Idle",
-				"17": "User 1",
-				"18": "User 2",
-				"19": "User 3"
-				},
-    	valveSelectList = [];
-    	$.each(bitmaskName, function ( index, value ) {
-    		$("#valveSelect").append('<option value="' + index + '">' + value + '</option>');
-    	});
+            $.each(this.profileData, function ( index, profile ) {
+                    $("#valveSelect").append('<option value="' + index + '">' + profile.name + '</option>');
+            });
     },
         buildOutputLEDs : function (divId)
         {
@@ -942,12 +866,15 @@ Brewtroller.valve = {
         },
 	printOutputProfiles : function(id, status)
     {
-		$(".valveBtn button").removeClass("btn-danger").addClass("btn-default");
-		var binary = Brewtroller.valve.bitmaskDecimalBinaryConvert(status),
-			activeProfiles = Brewtroller.valve.binaryToProfileTranslate(binary);
-		$.each(activeProfiles, function(index, value) {
-			$("#" + value).removeClass("btn-default").addClass("btn-danger");
-		});
+            var actBitmask = parseInt(status);
+            $.each(this.profileData, function(index, profile) {
+                var profileDiv = $("#" + profile.div);
+                if (actBitmask&profile.bitmask) {
+                    profileDiv.removeClass("btn-default").addClass("btn-danger");
+                } else {
+                    profileDiv.removeClass("btn-danger").addClass("btn-default");
+                }
+            });
 	},
         printActOutputs : function(id, status)
     {
