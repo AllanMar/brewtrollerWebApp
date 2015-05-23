@@ -220,6 +220,10 @@ Brewtroller.valve.buildOutputLEDs("#div_outputLEDs");
   });
   Brewtroller.valve.buildValveSelectBox();
   $("#valveSelect").on("change", function() {
+          $("#outputStat").toggleClass("collapse", false);  //Make sure the div is expanded
+            $('html, body').animate({
+                  scrollTop: $("#outputStat").offset().top
+              }, 1000);
 	  var valveAddress = $("option:selected", $(this)).val();
 	  $("[id^=valve] button:nth-child(2)").removeClass("btn-default").addClass("btn-danger");
 	  $("[id^=valve] button:nth-child(1)").removeClass("btn-danger").addClass("btn-default");
