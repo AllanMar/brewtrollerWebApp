@@ -885,39 +885,40 @@ Brewtroller.valve = {
                 $("#out" + index).toggleClass('led-green', state);
             }
 	},
+    printValveOutputs: function (data) {
+        var outputBitMask = parseInt(data.Valves, 10);
+        for (i = 0; i < 32; i++) { //Current BT max of 32bit
+            var vlvNum= i+1; //Display numbering starts at 1
+            var onBtn = $("#valve" + vlvNum + " button:first");
+            var offBtn = $("#valve" + vlvNum + " button:nth-child(2)");
+            if (outputBitMask&(1<<i)) {
+                onBtn.removeClass("btn-default").addClass("btn-danger");
+                offBtn.removeClass("btn-danger").addClass("btn-default");
+            } else {
+                onBtn.removeClass("btn-danger").addClass("btn-default");
+                offBtn.removeClass("btn-default").addClass("btn-danger");
+            }
+        }   
+    },
     getValveProfileConfig : function (valveProfile) {
-    	var currValveProfile;
-    	currValveProfile = brewTrollerExecCommand(BTCMD_GetValveProfileConfig,
-    						   valveProfile,
-    						   null,
-    							host,
-    							username,
-    							password,
-    							function(data){
-    								splitDecimal = Brewtroller.valve.bitmaskDecimalBinaryConvert(data.Valves);
-    								var mask = splitDecimal.split('');
-    								$.each(mask, function (index, value) {
-    									if (value === "1") {
-    										index++;
-    										$("#valve" + index + " button:first").removeClass("btn-default").addClass("btn-danger");
-    										$("#valve" + index + " button:nth-child(2)").removeClass("btn-danger").addClass("btn-default");
-    									} else {
-    										index++;
-    										$("#valve" + index + " button:first").removeClass("btn-danger").addClass("btn-default");
-    										$("#valve" + index + " button:nth-child(2)").removeClass("btn-default").addClass("btn-danger");
-    									}
-    								});
-    							});
+    	brewTrollerExecCommand(BTCMD_GetValveProfileConfig,
+                            valveProfile,
+                            null,
+                            host,
+                            username,
+                            password,
+                            Brewtroller.valve.printValveOutputs
+                        );
     },
     setValveProfileConfig : function (profileId, bitmask) {
     	brewTrollerExecCommand(
-    			BTCMD_SetValveProfileConfig,
-    			profileId,
-    			{"Valve_Bits" : bitmask},
-    			host,
-    			username,
-    			password,
-    			function(data){}
+                            BTCMD_SetValveProfileConfig,
+                            profileId,
+                            {"Valve_Bits" : bitmask},
+                            host,
+                            username,
+                            password,
+                            Brewtroller.valve.printValveOutputs //Update display with returned valve outputs
     			);
     }
 };
