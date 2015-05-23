@@ -82,6 +82,7 @@ Brewtroller.init = function () {
   $("#programModalButton").on("click", function () {
 	  Brewtroller.program.getProgramList();
   });
+  
   hltGauge = new Gauge({
 	  						renderTo : 'hltGauge',
 	  						maxValue : 250,
@@ -193,6 +194,9 @@ Brewtroller.init = function () {
 ////		  colorOfCenterCircleFill: "#CCCCCC"
 ////	  }).gauge('setValue', 200);
 //  }
+$("#activeVP :button").on("click", function() { //Any Valve profile button clicked
+    Brewtroller.valve.updateActProfile($(this));
+});
 Brewtroller.valve.buildOutputLEDs("#div_outputLEDs"); 
   $("#outputSave").on("click", function () {
 	  var outputBitmask = [],
@@ -253,6 +257,8 @@ Brewtroller.valve.buildOutputLEDs("#div_outputLEDs");
   $("#powerSlider").slider().on("slideStop", function(ev){
 	  Brewtroller.boil.control("2", ev.value);
   });
+  
+  
 };
 
 //Brewtroller Connected Functions
@@ -903,6 +909,31 @@ Brewtroller.valve = {
                 offBtn.removeClass("btn-default").addClass("btn-danger");
             }
         }   
+    },
+    updateActProfile : function (button) {
+        var profileBitmask = 0;
+        $.each(this.profileData, function(index, profile) {
+            if (profile.div === button.attr('id')) 
+                profileBitmask = profile.bitmask;
+        });
+        if (!profileBitmask)
+            throw new Error("BtWebApp: ERROR - Unhandled valve profile.");
+        
+        var action = (button.hasClass("btn-danger") ? 0 : 1); // 0=UNSET, 1= SET
+        brewTrollerExecCommand(
+                    BTCMD_SetActValveProfile,
+                    null,
+                    {
+                        "profileBitmask" : profileBitmask,
+                        "action" : action
+                    },
+                    host,
+                    username,
+                    password,
+                    function (data) {//Update display with response
+                        Brewtroller.valve.printOutputProfiles("#div_outputProfiles", data.profileStatus);
+                    }
+                );
     },
     getValveProfileConfig : function (valveProfile) {
     	brewTrollerExecCommand(BTCMD_GetValveProfileConfig,
