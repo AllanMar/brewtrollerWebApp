@@ -207,7 +207,7 @@ Brewtroller.valve.buildOutputLEDs("#div_outputLEDs");
 		  outputBitmask += bit;
 	  });
   var profileId = $("#valveSelect").val();
-  outputDecimal = Brewtroller.valve.bitmaskBinaryDecimalConvert(outputBitmask);
+  outputDecimal = parseInt(outputBitmask.split("").reverse().join(""),2);
   Brewtroller.valve.setValveProfileConfig(profileId, outputDecimal);
   });
   $("[id^=valve]").each(function () {
