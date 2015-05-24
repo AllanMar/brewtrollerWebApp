@@ -10,9 +10,11 @@
 <link rel="stylesheet" href="css/jquery.sidr.light.css">
 <link rel="stylesheet" href="css/slider.css">
 <link rel="stylesheet" href="css/bootstrap-formhelpers.min.css">
+<link rel="stylesheet" href="css/bootstrap-toggle.min.css">
 <link rel="stylesheet" href="css/main.css">
 <!-- User Defined CSS Preferences  -->
 <link rel="stylesheet" href="css/userprefs.css">
+
 
 <!--  Pulled Font-Awesome for NHC with no Internet Access -->
 <!-- <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"> -->
@@ -26,6 +28,8 @@
 <script type="text/javascript" src="framework/segment-display.js"></script>
 <script src="framework/gauge.min.js"></script>
 <script src="framework/bootstrap-formhelpers.js"></script>
+<script src="framework/bootstrap-toggle.min.js"></script>
+
 <script>
 	function printAlarm(id, status)
     {
@@ -404,6 +408,7 @@
 				</div>
         	</div>
         </div>
+        </div>
         <div  class="row">
             <div class="col-sm-12">
                 <div class="panel panel-default">
@@ -419,154 +424,20 @@
 				  	</select>
 				  </div>
 				  <div id="outputStat" class="panel-collapse collapse">
-				  <div id="outPutStatus"class="panel-body">
-				  	<div class="row">
-				  		<div class="col-sm-12">
-						    <div class="row">
-						    <div class="col-sm-12">
-						    <div id="valve1" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve2" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve3" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve4" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve5" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve6" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve7" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve8" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve9" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve10" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve11" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve12" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve13" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve14" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve15" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve16" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							</div>
-							</div>
-							<div class="row">
-							<div class="col-sm-12">
-							<div id="valve17" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve18" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve19" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve20" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve21" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve22" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve23" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve24" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve25" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve26" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve27" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve28" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve29" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve30" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve31" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							<div id="valve32" class="btn-group-vertical">
-							  <button type="button" class="btn btn-default btn-sm">On</button>
-							  <button type="button" class="btn btn-default btn-sm">Off</button>
-							</div>
-							</div>
-							</div>
-						  </div>
-						</div>
-					  </div>
-					  </div>
-					</div>
+                                    <div id="outputProfileConfigPanel" class="panel-body">
+                                          <div class="row">
+                                              <div id="outputProfileCfgSwitches" class="col-sm-12">
+                                                  <!-- Brewtroller.valve.buildValveProfileCfg -->
+                                              </div>
+                                          </div>
+                                      </div>
+                                    </div>
+                                </div>
+                                  </div>
 <!-- 				</div> -->
             </div>
         </div>
-    </div>
+
     
     <!-- Status Data modal -->
     <div class="modal fade" id="statusData" tabindex="-1" role="dialog" aria-labelledby="statusDataLabel" aria-hidden="true">
@@ -699,7 +570,6 @@
             </div>
         </div>
     </div>
-  </div>
 </body>
 <script src="js/brewtroller.js"></script>
 <script src="js/cgiByteCodeMap.js"></script>

@@ -448,3 +448,16 @@ var BTCMD_SetValveProfileConfig = {
 		            "Valves"
 		            ]
 	};
+var BTCMD_SetActValveProfile = {
+        reqCode: 'b',
+        reqIndex: false,
+        reqParams: [
+                    "profileBitmask",
+                    "action"
+                    ],
+        rspCode: 'w',
+        rspParams: [
+                    "responseCode",
+                    "profileStatus"
+                    ]
+};
