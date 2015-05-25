@@ -210,11 +210,13 @@ Brewtroller.valve.buildValveProfileCfg("#outputProfileCfgSwitches", maxOutputs);
         Brewtroller.valve.setValveProfileConfig(profileId, (outputBitmask>>>0));
   });
   Brewtroller.valve.buildValveSelectBox();
-  $("#valveSelect").on("change", function() {
-          $("#outputStat").toggleClass("collapse", false);  //Make sure the div is expanded
-            $('html, body').animate({
+  $("#outputStat").on('shown.bs.collapse', function () {
+      $('html, body').animate({
                   scrollTop: $("#outputStat").offset().top
               }, 1000);
+  });
+  $("#valveSelect").on("change", function() {
+          $("#outputStat").collapse('show');  //Make sure the div is expanded
 	  var valveAddress = $("option:selected", $(this)).val();
 	  var valveProfileDetails = Brewtroller.valve.getValveProfileConfig(valveAddress);
 	});
