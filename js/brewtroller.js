@@ -885,10 +885,13 @@ Brewtroller.valve = {
                 var profileDiv = $("#" + profile.div);
                 if (autoBitmask&profile.bitmask) {
                     profileDiv.removeClass("btn-success").removeClass("btn-danger").addClass("btn-primary");
+                    profileDiv.prop('disabled', true);
                 } else if (actBitmask&profile.bitmask)  {
                     profileDiv.removeClass("btn-primary").removeClass("btn-danger").addClass("btn-success");
+                    profileDiv.prop('disabled', false);
                 } else {
                     profileDiv.removeClass("btn-primary").removeClass("btn-success").addClass("btn-danger");
+                    profileDiv.prop('disabled', false);
                     
                 }
             });
