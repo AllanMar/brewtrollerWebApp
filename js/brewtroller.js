@@ -19,7 +19,7 @@ var hosts,
 	btVersion = "0.0",
 	btUnits = "imperial",
         lastAutoStatus = "",
-        maxOutputs = 32; //32 MAX.
+        maxOutputs = 20; //32 MAX.
 
 //Setup Segment Display
 var mashdisplay = new SegmentDisplay("mashDisplay");
