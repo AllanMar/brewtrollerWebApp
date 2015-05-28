@@ -264,8 +264,12 @@ Brewtroller.connected = {
     },    
     loop : function () {
       if(connected === true) {
+        if (btVersion === 0) {
+            brewTrollerExecCommand(BTCMD_GetVersion, null, {}, host, username, password, Brewtroller.status.updateVersion);
+        } else {
+            brewTrollerExecCommand(BTCMD_GetStatus, null, {}, host, username, password, Brewtroller.status.printUI);
+        }
         Brewtroller.connected.checkWatchdog();
-        brewTrollerExecCommand(BTCMD_GetStatus, null, {}, host, username, password, Brewtroller.status.printUI);
         setTimeout(Brewtroller.connected.loop, 750);
         Brewtroller.status.updateStatusBar();
       }
@@ -365,167 +369,7 @@ Brewtroller.program = {
 		   $("#modal_beerXMLLoader").modal("hide"); 
 		   //Brewtroller.program.getProgramList(); This is being run before the new program is sent. Why?
 	      }
-  },
-  sendRecipeToBrewtroller : function (beerJSON) {
-	  var recipeSlot = $("#loadProgramNumber").val() - 1,
-	  	  hopBitMask = "",
-	  	  bitMaskHash = [],
-	  	  bitMaskSplit,
-	  	  hopTimes = [
-	  	              "105",
-	  	              "90",
-	  	              "75",
-	  	              "60",
-	  	              "45",
-	  	              "30",
-	  	              "20",
-	  	              "15",
-	  	              "10",
-	  	              "5",
-	  	              "0",
-	  	              ],
-	  	  $i = 1,
-	  	  recipe = beerJSON.RECIPE,
-	  	  name = recipe.NAME,
-	  	  batchSize = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["BATCH_SIZE"]), "volume", "metric", btUnits)).toFixed(1),
-	  	  grainWeight = 0,
-		  grainRatio = 0,
-		  ratio = "",
-	  	  doughInTemp = 0, //beerJSON["RECIPE"]["DOUGHINTEMP"],
-	  	  doughInTime = "0", //beerJSON["RECIPE"]["DOUGHINMINUTES"],
-	  	  acidTemp = 0, //beerJSON["RECIPE"]["ACIDTEMP"],
-	  	  acidTime = "0", //beerJSON["RECIPE"]["ACIDMINUTES"],
-	  	  proteinTemp = 0,
-	  	  proteinTime = "0",
-	  	  saccTemp = 0,
-	  	  saccTime = "0",
-	  	  saccTemp2 = 0,
-	  	  saccTime2 = "0",
-	  	  mashOutTemp = 0,
-	  	  mashOutTime = "0",
-	  	  mashArray = [],
-	  	  spargeTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["MASH"]["SPARGE_TEMP"]),"temperature","metric", btUnits)).toFixed(0),
-	  	  boilTime = parseInt(beerJSON["RECIPE"]["BOIL_TIME"]),
-		  chillTemp = Number(correctUnits(parseFloat(beerJSON["RECIPE"]["PRIMARY_TEMP"]),"temperature","metric", btUnits)).toFixed(0);	  
-
-	  $.each(beerJSON["RECIPE"]["FERMENTABLES"]["FERMENTABLE"], function(index, value) {
-		  grainWeight = grainWeight + parseFloat(value["AMOUNT"]);
-		});
-		grainWeight = Number(correctUnits(grainWeight,"weight","metric",btUnits)).toFixed(2);
-		
-		if (beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"].isArray) { //If MASH_STEP is not array, convert it to one (for further processing).
-			mashArray = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"];
-		} else {
-			mashArray[0] = beerJSON["RECIPE"]["MASH"]["MASH_STEPS"]["MASH_STEP"];
-		}
-		$.each(mashArray, function(index, value) {
-			if (ratio === "") ratio = value["WATER_GRAIN_RATIO"]; //Use first entry. Need to confirm.
-			var stepTime = parseInt(value["STEP_TIME"]);
-			var stepTemp = Number(correctUnits(parseFloat(value["STEP_TEMP"]),"temperature","metric", btUnits)).toFixed(0);
-			if(value["NAME"] == "Protein Rest") {
-				proteinTime = stepTime;
-				proteinTemp = stepTemp;
-			}else if (value["NAME"] == "Saccharification" || mashArray.length == 1) { //If only one entry use as Saach
-				saccTime = stepTime;
-				saccTemp = stepTemp;
-			}else if (value["NAME"] == "Mash Out") {
-				mashOutTemp = stepTemp;
-				mashOutTime = stepTime;
-			}
-	  });
-	  if (ratio.lastIndexOf('qt/lb') != -1){
-		  ratio = parseFloat(ratio);
-		  grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
-	  } else if (ratio.lastIndexOf('l/kg')){
-		  ratio = parseFloat(ratio);
-		  grainRatio = Number(correctUnits(ratio, "ratio", "imperial", btUnits).toFixed(2));
-	  }
-
-	  if(beerJSON["RECIPE"]["HOPS"]["HOP"][0]) {
-	  $.each(beerJSON["RECIPE"]["HOPS"]["HOP"], function(index, value){
-		bitMaskSplit = value["TIME"].split(".");
-		bitMaskHash[bitMaskSplit[0]] = "1";
-	  });
-  	  } else {
-  		bitMaskSplit = beerJSON["RECIPE"]["HOPS"]["HOP"]["TIME"].split(".");
-		bitMaskHash[bitMaskSplit[0]] = "1";  
-  	  }
-	  $.each(hopTimes, function (index, value) {
-		  if(bitMaskHash[value]) {
-			  hopBitMask = hopBitMask + "1";
-		  }else{
-			  hopBitMask = hopBitMask + "0";
-		  }
-	  });
-	  brewTrollerExecCommand(BTCMD_SetProgramSettings,
-			  recipeSlot,
-			  {
-			      "Sparge_Temp": spargeTemp,
-				  "HLT_Setpoint": spargeTemp, //HLT Setpoint
-				  "Boil_Mins": boilTime,
-				  "Pitch_Temp": chillTemp,
-				  "Boil_Additions": hopBitMask,
-				  "Mash_Liquor_Heat_Source": "0"
-			  },			  
-			  host,
-			  username,
-			  password,
-			  function(data){});
-    
-	  brewTrollerExecCommand(BTCMD_SetProgramName,
-			  recipeSlot,
-			  {
-		  		"Program_Name": name
-			  },			  
-			  host,
-			  username,
-			  password,
-			  function(data){});
-	  
-	  brewTrollerExecCommand(BTCMD_SetProgramMashTemps,
-			  recipeSlot,
-			  {
-			  "Dough_In_Temp": doughInTemp,
-			  "Acid_Temp": acidTemp,
-			  "Protein_Temp": proteinTemp,
-			  "Sacch_Temp": saccTemp,
-			  "Sacch2_Temp": saccTemp2,
-			  "Mash_Out_Temp": mashOutTemp
-			  },			  
-			  host,
-			  username,
-			  password,
-			  function(data){});
-	  
-	  brewTrollerExecCommand(BTCMD_SetProgramMashMins,
-			  recipeSlot,
-			  {
-			  "Dough_In_Mins": doughInTime,
-			  "Acid_Mins": acidTime,
-			  "Protein_Mins": proteinTime,
-			  "Sacch_Mins": saccTime,
-			  "Sacch2_Mins": saccTime2,
-			  "Mash_Out_Mins": mashOutTime
-			  },			  
-			  host,
-			  username,
-			  password,
-			  function(data){});
-	  
-	  
-	  brewTrollerExecCommand(BTCMD_SetProgramVolumes,
-			  recipeSlot,
-			  {
-			  "Batch_Volume": batchSize,
-			  "Grain_Weight": grainWeight,
-			  "Mash_Ratio": grainRatio
-			  },			  
-			  host,
-			  username,
-			  password,
-			  function(data){});
-	  
-  }  
+  }
 };
 	
 //Timer Functions
@@ -649,6 +493,11 @@ Brewtroller.reset = {
 
 //Status Functions
 Brewtroller.status = {
+        updateVersion : function (data) {
+		btVersion = parseFloat(data["btVersion"]);
+		btUnits = (data["metric"]=="0" ? "metric" : "imperial");
+		Brewtroller.connected.connectWatchdog();
+	},
 	updateStatusBar : function () {
 		if(programName2 !== "255" && programName2 !== "") {
 			$('#boilZonePanel').show();
